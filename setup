@@ -1,0 +1,83 @@
+#!/bin/bash
+# Sets up a Mac for Ruby on Rails development.
+set -o nounset -o errexit -o pipefail
+
+RUBY_VERSION="3.2.2"
+
+die() {
+  echo $1 >&2
+  exit 1
+}
+
+SHELL_RESTART_REQUIRED=false
+
+# Check that Z shell is being used
+echo "Checking zsh"
+if [ "$SHELL" != "/bin/zsh" ]; then
+  die "Requires Z shell"
+fi
+
+# Check that Apple's Xcode Command Line Tools are installed
+echo "Checking xcode-select"
+if [ ! -f "/usr/bin/xcode-select" ]; then
+  die "xcode-select is not installed"
+fi
+
+# Check that Homebrew is installed
+echo "Checking brew"
+if [ ! -f "/opt/homebrew/bin/brew" ]; then
+  die "Homebrew is not installed"
+fi
+
+# Check git
+echo "Checking git"
+git --version || die "Error running git"
+git config -l --global || die "Configure git before continuing."
+
+# Install frum Ruby version manager
+if ! brew list frum &>/dev/null; then
+  echo "Installing frum"
+  brew install frum
+fi
+if ! grep -q -e "frum init" $HOME/.zshrc; then
+  echo "Configuring zsh to initialize frum"
+  echo '' >> $HOME/.zshrc
+  echo '# enable frum' >> $HOME/.zshrc
+  echo 'eval "$(frum init | sed "s/quiet local/quiet local | true/")"' >> $HOME/.zshrc # sed is a workaround for https://github.com/TaKO8Ki/frum/issues/128
+  SHELL_RESTART_REQUIRED=true
+  # Apply changes to this script's environment
+  eval "$(frum init | sed "s/quiet local/quiet local | true/")"
+fi
+
+# Install Ruby
+if $(frum versions | grep -q -x -e "* $RUBY_VERSION"); then
+  echo "Ruby $RUBY_VERSION already installed"
+else
+  echo "Installing Ruby $RUBY_VERSION"
+  frum install $RUBY_VERSION
+fi
+echo "Setting global Ruby version to $RUBY_VERSION"
+frum global $RUBY_VERSION
+echo "Add a .ruby-version file to a project so that Frum will switch the local Ruby version when you enter that project's directory."
+
+# Install node
+if [ ! -f /opt/homebrew/bin/node ]; then
+  echo "Installing node"
+  brew install node
+fi
+
+# Install yarn
+if [ ! -f /opt/homebrew/bin/yarn ]; then
+  echo "Installing yarn"
+  brew install yarn
+fi
+
+# Run brew doctor
+echo "Running brew doctor"
+brew doctor || die "Fix brew doctor errors before continuing."
+
+# Finish
+echo "Setup finished"
+if [ "$SHELL_RESTART_REQUIRED" == "true" ]; then
+  echo "Start a new shell to apply the changes."
+fi
