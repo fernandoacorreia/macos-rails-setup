@@ -21,16 +21,20 @@ if [ ! -f "/usr/bin/xcode-select" ]; then
   die "xcode-select is not installed"
 fi
 
+# Check git
+echo "Checking git"
+git --version || die "Error running git"
+git config -l --global || die "Configure git before continuing."
+
 # Check that Homebrew is installed
 echo "Checking brew"
 if [ ! -f "/opt/homebrew/bin/brew" ]; then
   die "Homebrew is not installed"
 fi
 
-# Check git
-echo "Checking git"
-git --version || die "Error running git"
-git config -l --global || die "Configure git before continuing."
+# Run brew doctor
+echo "Running brew doctor"
+brew doctor || die "Fix brew doctor errors before continuing."
 
 # Install node
 if [ ! -f /opt/homebrew/bin/node ]; then
@@ -86,9 +90,21 @@ else
 fi
 rails -v
 
-# Run brew doctor
-echo "Running brew doctor"
-brew doctor || die "Fix brew doctor errors before continuing."
+# Install PostgreSQL
+  POSTGRES_VERSION=16
+if [ -d /opt/homebrew/Cellar/postgresql@$POSTGRES_VERSION ]; then
+  echo "PostgreSQL is already installed"
+else
+  echo "Installing PostgreSQL"
+  brew install postgresql@$POSTGRES_VERSION
+  echo '' >> $HOME/.zshrc
+  echo '# Add PostgreSQL to path' >> $HOME/.zshrc
+  echo export POSTGRES_VERSION=$POSTGRES_VERSION >> $HOME/.zshrc
+  echo 'export PATH="/opt/homebrew/Cellar/postgresql@$POSTGRES_VERSION/$POSTGRES_VERSION.0/bin:$PATH"' >> $HOME/.zshrc
+  SHELL_RESTART_REQUIRED=true
+  echo "To start PostgreSQL run:"
+  echo "brew services start postgresql@$POSTGRES_VERSION"
+fi
 
 # Finish
 echo "Setup finished"
