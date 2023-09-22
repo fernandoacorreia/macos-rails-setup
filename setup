@@ -91,7 +91,7 @@ fi
 rails -v
 
 # Install PostgreSQL
-  POSTGRES_VERSION=16
+POSTGRES_VERSION=16
 if [ -d /opt/homebrew/Cellar/postgresql@$POSTGRES_VERSION ]; then
   echo "PostgreSQL is already installed"
 else
