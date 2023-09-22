@@ -33,7 +33,7 @@ rails server
 
 Create a `.ruby-version` file:
 
-``
+```
 ❯ cat .ruby-version
 ruby-3.2.2
 ```
