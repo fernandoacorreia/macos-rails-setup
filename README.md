@@ -13,20 +13,26 @@ Sets up a Mac for Ruby on Rails development.
 ### Create a new Rails app
 
 ```
-rails new --minimal myapp
+rails new myapp --database=postgresql
 cd myapp
 ```
 
 ### List Rake tasks
 
 ```
-rails -T
+bin/rails -T
+```
+
+### Create the development database
+
+```
+bin/rails db:create
 ```
 
 ### Run the Rails application
 
 ```
-rails server
+bin/rails server
 ```
 
 ### Set the Ruby version for a project
