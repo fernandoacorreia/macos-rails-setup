@@ -2,8 +2,6 @@
 # Sets up a Mac for Ruby on Rails development.
 set -o nounset -o errexit -o pipefail
 
-RUBY_VERSION="3.2.2"
-
 die() {
   echo $1 >&2
   exit 1
@@ -34,6 +32,18 @@ echo "Checking git"
 git --version || die "Error running git"
 git config -l --global || die "Configure git before continuing."
 
+# Install node
+if [ ! -f /opt/homebrew/bin/node ]; then
+  echo "Installing node"
+  brew install node
+fi
+
+# Install yarn
+if [ ! -f /opt/homebrew/bin/yarn ]; then
+  echo "Installing yarn"
+  brew install yarn
+fi
+
 # Install frum Ruby version manager
 if ! brew list frum &>/dev/null; then
   echo "Installing frum"
@@ -50,6 +60,7 @@ if ! grep -q -e "frum init" $HOME/.zshrc; then
 fi
 
 # Install Ruby
+RUBY_VERSION="$(frum install -l | grep -v -E '\-' | tail -n 1)"
 if $(frum versions | grep -q -x -e "* $RUBY_VERSION"); then
   echo "Ruby $RUBY_VERSION already installed"
 else
@@ -60,17 +71,20 @@ echo "Setting global Ruby version to $RUBY_VERSION"
 frum global $RUBY_VERSION
 echo "Add a .ruby-version file to a project so that Frum will switch the local Ruby version when you enter that project's directory."
 
-# Install node
-if [ ! -f /opt/homebrew/bin/node ]; then
-  echo "Installing node"
-  brew install node
-fi
+# Check that gem is installed
+gem -v >/dev/null || die "gem is not installed"
 
-# Install yarn
-if [ ! -f /opt/homebrew/bin/yarn ]; then
-  echo "Installing yarn"
-  brew install yarn
+# Faster Gem installation
+echo "gem: --no-document" >> $HOME/.gemrc
+
+# Install Rails
+if gem list | grep -E '^rails ' &>/dev/null; then
+  echo "Rails is already installed"
+else
+  echo "Installing Rails"
+  gem install rails
 fi
+rails -v
 
 # Run brew doctor
 echo "Running brew doctor"
