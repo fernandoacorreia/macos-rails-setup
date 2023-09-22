@@ -8,6 +8,42 @@ Sets up a Mac for Ruby on Rails development.
 ./setup
 ```
 
+## After setup
+
+### Create a new Rails app
+
+```
+rails new --minimal myapp
+cd myapp
+```
+
+### List Rake tasks
+
+```
+rails -T
+```
+
+### Run the Rails application
+
+```
+rails server
+```
+
+### Set the Ruby version for a project
+
+Create a `.ruby-version` file:
+
+``
+❯ cat .ruby-version
+ruby-3.2.2
+```
+
+Use `frum` to set the current Ruby version:
+
+```
+frum local
+```
+
 ## References
 
 - [Install Ruby on Rails 7 · macOS](https://mac.install.guide/rubyonrails/index.html)
